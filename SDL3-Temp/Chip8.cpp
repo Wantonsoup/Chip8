@@ -13,7 +13,7 @@ Chip8::Chip8()
 
 void Chip8::Initialise()
 {
-	// Reset CPU state.
+	// reset CPU state.
 	registers.fill(0);
 	memory.fill(0);
 	stack.fill(0);
@@ -28,13 +28,13 @@ void Chip8::Initialise()
 	soundTimer = 0;
 	opcode = 0;
 
-	// Load fontset into memory.
+	// load fontset into memory.
 	for (std::size_t i = 0; i < FONTSET_SIZE; ++i)
 	{
 		memory[FONTSET_START_ADDRESS + i] = fontset[i];
 	}
 
-	// Seed random number generator.
+	// seed random number generator.
 	
 	randGen.seed(
 		static_cast<unsigned int>(
@@ -45,6 +45,7 @@ void Chip8::Initialise()
 	);
 
 	// Initialise all opcode tables to invalid instructions.
+	// std::fill better rather than if statements. It is more efficient and easier to read.
 	// std::fill creates array and points to OP_Null. When invalid opcode is called, OP_Null will be executed.
 	std::fill(std::begin(table), std::end(table), &Chip8::OP_NULL);
 	std::fill(std::begin(table0), std::end(table0), &Chip8::OP_NULL);
@@ -106,20 +107,21 @@ void Chip8::LoadROM(const char* filename)
 	// Open the file as a stream of binary and move the file pointer to the end
 	std::ifstream file(filename, std::ios::binary | std::ios::ate);
 	
-	// Check if the file was successfully opened
+	// check if file open successfully
 	if (!file)
 	{
 		throw std::runtime_error("Failed to open ROM: " + std::string(filename));
 	}
 
-	// Get the size of the file by checking the current position of the file pointer (which is at the end)
+	// get the size of the file by checking the current position of the file pointer (which is at the end)
 	const std::streamsize size = file.tellg();
 
 	if (size < 0)
 	{
 		throw std::runtime_error("Failed to determine ROM size.");
 	}
-	// Calculate the available memory for the ROM, which is the total memory size minus the start address where the ROM will be loaded
+
+	// Calculate the available memory for the ROM, which is the total memory size - the start address where the ROM will be loaded
 	constexpr std::size_t availableMemory = MEMORY_SIZE - START_ADDRESS;
 
 	if (static_cast<std::size_t>(size) > availableMemory)
@@ -145,6 +147,10 @@ void Chip8::LoadROM(const char* filename)
 
 void Chip8::Cycle()
 {
+	if (pc >= MEMORY_SIZE - 1)
+	{
+		throw std::runtime_error("PC out of bounds");
+	}
 	// Fetch
 	opcode =
 		static_cast<uint16_t>(memory[pc]) << 8u |
@@ -439,6 +445,7 @@ void Chip8::OP_Cxkk()
 
 void Chip8::OP_Dxyn()
 {
+
 	uint8_t Vx = static_cast<uint8_t>((opcode & 0x0F00u) >> 8u);
 	uint8_t Vy = static_cast<uint8_t>((opcode & 0x00F0u) >> 4u);
 	uint8_t height = static_cast<uint8_t>(opcode & 0x000Fu);
@@ -451,10 +458,21 @@ void Chip8::OP_Dxyn()
 
 	for (unsigned int row = 0; row < height; ++row)
 	{
+		// If row is bigger than screen height, break loop. 
+		if(yPos + row >= VIDEO_HEIGHT)
+		{
+			break;
+		}
 		uint8_t spriteByte = memory[index + row];
 
 		for (unsigned int col = 0; col < 8; ++col)
 		{
+			// If column is bigger than screen width, break loop.
+			if (xPos + col >= VIDEO_WIDTH)
+			{
+				break;
+			}
+
 			uint8_t spritePixel = static_cast<uint8_t>(spriteByte & (0x80u >> col));
 			uint32_t* screenPixel = static_cast<uint32_t*>(&video[(yPos + row) * VIDEO_WIDTH + (xPos + col)]);
 

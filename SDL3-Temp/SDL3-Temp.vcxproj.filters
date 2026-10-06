@@ -20,9 +20,6 @@
     <ClCompile Include="Chip8.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Platform.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Chip8.h">
@@ -34,6 +31,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="test_opcode.ch8">
+      <Filter>ROMs</Filter>
+    </None>
+    <None Include="..\Tetris.ch8">
       <Filter>ROMs</Filter>
     </None>
   </ItemGroup>

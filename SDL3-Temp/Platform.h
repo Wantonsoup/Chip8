@@ -15,6 +15,7 @@ public:
         int textureWidth,
         int textureHeight)
     {
+		// Initialize SDL with video subsystem.
         if (!SDL_Init(SDL_INIT_VIDEO))
         {
             throw std::runtime_error(
@@ -71,6 +72,12 @@ public:
 
             throw std::runtime_error(error);
         }
+
+		// used for pixel scaling to prevnet blurring of the image when scaling up
+
+        SDL_SetTextureScaleMode(
+            texture,
+            SDL_SCALEMODE_NEAREST);
     }
 
     ~Platform()
@@ -110,6 +117,8 @@ public:
             nullptr);
 
         SDL_RenderPresent(renderer);
+
+        
     }
 
     bool ProcessInput(uint8_t* keys)

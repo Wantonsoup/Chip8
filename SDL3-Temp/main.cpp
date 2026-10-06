@@ -9,7 +9,7 @@
 
 int main(int argc, char** argv)
 {
-    /*
+	// Check command line arguments.
     if (argc != 4)
     {
         std::cerr
@@ -19,10 +19,14 @@ int main(int argc, char** argv)
 
         return EXIT_FAILURE;
     }
-    */
+    
+    
 
     try
     {
+		// Parse command line arguments.
+		// Scale: The scale factor for the video output.
+		// Cycle Delay: The delay in milliseconds between each CPU cycle.
         const int videoScale = std::stoi(argv[1]);
         const int cycleDelay = std::stoi(argv[2]);
 
@@ -49,8 +53,9 @@ int main(int argc, char** argv)
 
         Chip8 chip8;
 
-        chip8.LoadROM("ROMs/test_opcode.ch8");
-
+        chip8.LoadROM("Tetris.ch8");
+        
+		// Pitch: Number of bytes in a row of the video buffer. Each pixel is 4 bytes (RGBA).
         const int videoPitch =
             sizeof(uint32_t) * static_cast<int>(VIDEO_WIDTH);
 
@@ -88,7 +93,7 @@ int main(int argc, char** argv)
                     videoPitch);
             }
 
-            // CHIP-8 timers run at 60 Hz.
+            // chip 8 timers run at 60 Hz.
             if (currentTime - lastTimerTime >= timerInterval)
             {
                 lastTimerTime = currentTime;
@@ -97,6 +102,7 @@ int main(int argc, char** argv)
             }
         }
     }
+    // fail if file is not found
     catch (const std::exception& exception)
     {
         std::cerr
